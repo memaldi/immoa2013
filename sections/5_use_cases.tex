@@ -3,7 +3,8 @@
 
 To illustrate the semantic representation of trust and provenance data through Provenance Ontology, a use case is presented: 311 Bilbao. 311 Bilbao, uses Linked Open Data to get an overview of reports of faults in public infrastructure. From the data owner’s point of view, enrichment of their datasets by third parties, such as users of the 311 Bilbao application, revealed two problems: 1) the fact that data does not need to be approved before being published and that there is no mechanism to control the amount of data a citizen can add and 2) there is still the need for a way to differentiate the default trustworthiness of the different authors such as citizens and city councils. At the following triples, the representation of the provenance of a user generated report is shown:
 
-\begin{verbatim}
+\lstset{numbers=left, basicstyle=\ttfamily\scriptsize,}
+\begin{lstlisting}
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
@@ -26,7 +27,7 @@ To illustrate the semantic representation of trust and provenance data through P
 .
 
 :jdoe
-    a iesc:Citizen, prov:Agent;
+    a iesc:Citizen, prov:Person;
     foaf:givenName  "John Doe";
     foaf:mbox       <mailto:jdoe@example.org>;
 .
@@ -41,8 +42,16 @@ To illustrate the semantic representation of trust and provenance data through P
 .
 
 :jane
-    a iesc:Citizen, prov:Agent;
-    foaf:givenName  "Jane";
-    foaf:mbox       <mailto:jane@example.org>
+    a iesc:Citizen, prov:Person;
+    foaf:givenName       "Jane";
+    foaf:mbox            <mailto:jane@example.org>
+    prov:actedOnBehalfOf :bilbao_city_council;
 .
-\end{verbatim}
+
+:bilbao_city_council
+    a iesc:Organization, prov:Organization;
+    foaf:name "Bilbao City Council";
+.
+\end{lstlisting}
+
+On this piece of semantic information the \texttt{:report\_23456} resource represents the report made by the user. This report is identified by its own and unique URL and provides information about the user that has made it and which activity that has generated this report (lines 14-27). The \texttt{:reportActivity\_23456} shows details about the activity that generated the report, like when the user starts to reporting the issue and when has ended. At lines 22-26 the information about "John Doe", the user that reported the fault, can be seen. In the example given, another user, Jane (lines 37-42), has revised the report made by John (lines 28-35). As the \texttt{prov:actedOnBehalfOf} attribute represents, Jane is some kind of municipal worker of Bilbao City Council (lines 51-54). As Jane's report has more authority agains John's report, John's report is invalidated as property \texttt{prov:invalidatedAtTime} represents.
