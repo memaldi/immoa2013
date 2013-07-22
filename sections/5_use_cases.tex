@@ -1,2 +1,36 @@
 \section{Use cases}
 \label{sec:use_cases}
+
+To illustrate the semantic representation of trust and provenance data, two use cases are presented: 311 Bilbao and AirQual Madrid.
+
+\subsection{311 Bilbao}
+\label{subsec:311}
+
+311 Bilbao, uses Linked Open Data to get an overview of reports of faults in public infrastructure. From the data owner’s point of view, enrichment of their datasets by third parties, such as users of the 311 Bilbao application, revealed two problems: 1) the fact that data does not need to be approved before being published and that there is no mechanism to control the amount of data a citizen can add and 2) there is still the need for a way to differentiate the default trustworthiness of the different authors such as citizens and city councils. At the following triples, the representation of the provenance of a user generated report is shown:
+
+\begin{verbatim}
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix iesc: <http://www.iescities.org/ont#> .
+@prefix :     <http://bilbao.iescities.org#> .
+
+:report_23456
+    a prov:Entity;
+    prov:wasGeneratedBy  :reportActivity_23456;
+    prov:wasAttributedTo :jdoe;
+.
+
+:reportActivity_23456
+    a prov:Activity;
+    prov:startedAtTime      "2013-07-22T01:01:01Z";
+    prov:wasAssociatedWith  :jdoe;
+    prov:endedAtTime        "2013-07-22T01:05:03Z";
+.
+
+:jdoe
+    a iesc:Citizen, prov:Agent;
+    foaf:givenName  "John Doe";
+    foaf:mbox       <mailto:jdoe@example.org>;
+.
+\end{verbatim}
