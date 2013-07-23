@@ -1,57 +1,50 @@
-\section{Use cases}
+\section{Semantic representation of provenance}
 \label{sec:use_cases}
 
-To illustrate the semantic representation of trust and provenance data through Provenance Ontology, a use case is presented: 311 Bilbao. 311 Bilbao, uses Linked Open Data to get an overview of reports of faults in public infrastructure. From the data owner’s point of view, enrichment of their datasets by third parties, such as users of the 311 Bilbao application, revealed two problems: 1) the fact that data does not need to be approved before being published and that there is no mechanism to control the amount of data a citizen can add and 2) there is still the need for a way to differentiate the default trustworthiness of the different authors such as citizens and city councils. At the following triples, the representation of the provenance of a user generated report is shown:
+To illustrate the semantic representation of trust and provenance data through Provenance Ontology and Uncertainty Provenance set of attributes, a use case is presented: 311 Bilbao. 311 Bilbao, uses Linked Open Data to get an overview of reports of faults in public infrastructure. From the data owner’s point of view, enrichment of their datasets by third parties, such as users of the 311 Bilbao application, revealed two problems: 1) the fact that data does not need to be approved before being published and that there is no mechanism to control the amount of data a citizen can add and 2) there is still the need for a way to differentiate the default trustworthiness of the different authors such as citizens and city councils. At the following triples, the representation of the provenance of a user generated report is shown:
 
 \lstset{numbers=left, basicstyle=\ttfamily\scriptsize,}
 \begin{lstlisting}
-@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix iesc: <http://www.iescities.org/ont#> .
+@prefix iesc: <http://iescities.eu/ont#> .
+@prefix up:   <http://users.ugent.be/~tdenies/up/> .
 @prefix :     <http://bilbao.iescities.org#> .
 
-:report_23456
-    a prov:Entity;
-    prov:wasGeneratedBy    :reportActivity_23456;
-    prov:wasAttributedTo   :jdoe;
-    prov:invalidatedAtTime "2013-07-22T03:05:03Z";
-    prov:value             "The paper bin is broken";
-.
+entity(:report_23456, [ prov:value="The paper bin is 
+broken" ])
+wasGeneratedBy(:report_23456, :reportActivity_23456)
+wasAttributedTo(:report_23456, :jdoe)
+wasInvalidatedBy(:report_23456, :invActivity_639, 
+2013-07-22T03:05:03)
 
-:reportActivity_23456
-    a prov:Activity;
-    prov:startedAtTime     "2013-07-22T01:01:01Z";
-    prov:wasAssociatedWith :jdoe;
-    prov:endedAtTime       "2013-07-22T01:05:03Z";
-.
+activity(:reportActivity_23456, 2013-07-22T01:01:01, 
+2013-07-22T01:05:03)
+wasAssociatedWith(:reportActivity_23456, :jdoe)
 
-:jdoe
-    a iesc:Citizen, prov:Person;
-    foaf:givenName  "John Doe";
-    foaf:mbox       <mailto:jdoe@example.org>;
-.
+agent(:jdoe, [ prov:type='prov:Person', foaf:name=
+"John Doe", foaf:mbox='<mailto:jdoe@example.org>' ])
 
-:report_23457
-    a prov:Entity;
-    prov:wasAttributedTo :jane;
-    prov:value           "It is incorrect, another 
-                         paper bin has replaced the 
-                         old one, but 2 meters beyond";
-    prov:wasRevisionOf   :report_23456;
-.
+entity(:report_23457, [ prov:value="It is incorrect, 
+another paper bin has replaced the old one, but 2 
+meters beyond" ])
+wasAttributedTo(:report_23457, :jane)
+wasDerivedFrom(:report_23457, :report_23456, 
+:invActivity_639, -, -, [ prov:type='prov:Revision' ])
 
-:jane
-    a iesc:Citizen, prov:Person;
-    foaf:givenName       "Jane";
-    foaf:mbox            <mailto:jane@example.org>
-    prov:actedOnBehalfOf :bilbao_city_council;
-.
+activity(:invActivity_639, 2013-07-22T02:58:01, 
+2013-07-22T03:04:47)
+wasAssociatedWith(:invActivity_639, :jane)
 
-:bilbao_city_council
-    a iesc:Organization, prov:Organization;
-    foaf:name "Bilbao City Council";
-.
+agent(:jane, [ prov:type='prov:Person', foaf:name=
+"Jane", foaf:mbox='<mailto:jane@bilbao.iescities.org>'
+ ])
+actedOnBehalfOf(:jane, :bilbao_city_council)
+
+agent(:bilbao_city_concil, [ prov:type=
+'prov:Organization', foaf:name="Bilbao City Council" 
+])
+
 \end{lstlisting}
 
-On this piece of semantic information the \texttt{:report\_23456} resource represents the report made by the user. This report is identified by its own and unique URL and provides information about the user that has made it and which activity that has generated this report (lines 14-27). The \texttt{:reportActivity\_23456} shows details about the activity that generated the report, like when the user starts to reporting the issue and when has ended. At lines 22-26 the information about "John Doe", the user that reported the fault, can be seen. In the example given, another user, Jane (lines 37-42), has revised the report made by John (lines 28-35). As the \texttt{prov:actedOnBehalfOf} attribute represents, Jane is some kind of municipal worker of Bilbao City Council (lines 51-54). As Jane's report has more authority agains John's report, John's report is invalidated as property \texttt{prov:invalidatedAtTime} represents.
+On this piece of semantic information the \texttt{:report\_23456} resource represents the report made by the user. This report is identified by its own and unique URL and provides information about the user that has made it and which activity that has generated this report (lines 14-27). The \texttt{:reportActivity\_23456} shows details about the activity that generated the report, like when the user starts to reporting the issue and when has ended. At lines 22-26 the information about "John Doe", the user that reported the fault, can be seen. In the example given, another user, Jane (lines 37-42), has revised the report made by John (lines 28-35). As the \texttt{prov:actedOnBehalfOf} attribute represents, Jane is some kind of municipal worker of Bilbao City Council (lines 51-54). As Jane's report has more authority agains John's report, John's report is invalidated as property \texttt{prov:invalidatedAtTime} represents. Allowing the semantic descriptions of the provenance of the reports made at 311 Bilbao app, the data generated by a concrete user can be reached through SPARQL \cite{prudhommeaux_sparql_2008} language queries.
