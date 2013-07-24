@@ -1,19 +1,21 @@
 \section{Provenance data based reliability}
 \label{sec:provenance}
 
-There exist some approaches on how to calculate trust in semantic web using provenance information. IWTrust \cite{zaihrayeu2005iwtrust} uses provenance in the trust component of an answering engine, in which a trust value for answers is measured based on the trust in sources and in users. In \cite{golbeck2006combining} provenance data is used to evaluate the reliability of users based on trust relationships within a social network. \cite{Hartig09usingweb} present an assesment method for evaluating the quality of data on the Web using provenance graphs, and provides a way to calculate trust values based on timeliness. In \cite{CeolinGHNF12} the authors propose generic procedures for computing reputation and trust assessments based on provenance information.
+There exist some approaches on how to calculate trust in semantic web using provenance information. IWTrust \cite{zaihrayeu2005iwtrust} uses provenance in the trust component of an answering engine, in which a trust value for answers is measured based on the trust in sources and in users. In \cite{golbeck2006combining} provenance data is used to evaluate the reliability of users based on trust relationships within a social network. \cite{Hartig09usingweb} present an assesment method for evaluating the quality of data on the Web using provenance graphs, and provides a way to calculate trust values based on timeliness. In \cite{CeolinGHNF12} the authors propose generic procedures for computing reputation and trust assessments based on provenance information. 
 
-In \cite{gil2007towards} the authors identify some factors that affect how users determine trust in content provided by web information sources. We have selected some of these parameters according to r
-
-
+In \cite{gil2007towards} the authors identify 19 parameters that affect how users determine trust in content provided by web information sources, such as the authority of the creator of the information or the popularity and recency of that information, among others. Based on these factors, we have built a generic model for the measurement of a trust value in the context of IES Cities, in which the trust according to each factor is calculated independently:
+%
 \begin{equation}
-confidence = confidence_{assertion} * confidence_{content}
+trust(report) = \frac{\sum_{p=[auth, agree...]}^{n} \alpha_p * trust_p(report)}{n}
 \end{equation}
+%
+where \textit{p} is the measured property and \textit{n} is the total number of measured properties. {\textalpha} is a value between 0 and 1 to denote the relevance of this property, making the measure based on a certain property more or less relevant. \textit{trust\textsubscript{p}} is a function that returns a value between 0 and 1 determining the trust of a given report according to a certain property.
 
-\begin{equation}
-confidence_{content} = \frac{\sum_{p=1}^{n} \alpha_p * score_p(report)}{n}
-\end{equation}
+Both the \textalpha values and the \textit{trust\textsubscript{p}} functions can be defined by the developers using IES Cities platform, because both of them are dependant on the context and the need of the application domain.
 
+To clarify, we are using this model in the 311 Bilbao use case. To that end, we have selected the most relevant trust-properties concerning our use case:
+
+\textbf{Authority:} Role stuff.
 \begin{equation}
 score_{authority} = \left\{\begin{matrix}
 0 & if user \neq admin \\
@@ -21,15 +23,23 @@ score_{authority} = \left\{\begin{matrix}
 \end{matrix}\right.
 \end{equation}
 
-\begin{equation}
-score_{distance} = \frac{1}{geodistance(loc_{report}, loc_{reportedplace})}
-\end{equation}
+\textbf{Popularity:} Visits and stuff proposed by Diego.
 
+\textbf{Agreement:} Reports saying the same thing.
 
-Timeliness is another metric to be taken into account to evaluate data quality, and can be defined as the the up-to-date degree of a data item in relation with the task at hand. We propose and adaption of \cite{Hartig09usingweb} formula to measure timeliness, based on the work described in \cite{Ballou:1998:MIM:291329.291335}:
+\textbf{Recommendation:} Sacha's +1 / -1.
 
+\textbf{Provenance:} Reputation of the user.
+
+\textbf{Recency / Timeliness:} Timeliness can be defined as the the up-to-date degree of a data item in relation with the task at hand. We propose and adaption of \cite{Hartig09usingweb} formula to measure timeliness, based on the work described in \cite{Ballou:1998:MIM:291329.291335}:
+%
 \begin{equation}
     timeliness = (max(1-\frac{currency}{volatility}), 0)^{sensitivity}
 \end{equation}
-
+%
 where \emph{currency} is the difference between the time data is presented to the user and the time it was reported to the system. \emph{Volatility} refers to the maximum amount of time a given report time should be active (for example, if a broken street lamp is reported, it should be repaired within a month at most), and \emph{sensitivity} may change its value by observing the updates made over the status of the report: it would adopt a high value for data being constantly updated, and a low value for data that does not change often.
+
+\textbf{Context:} Geographical distance.
+\begin{equation}
+score_{distance} = \frac{1}{geodistance(loc_{report}, loc_{reportedplace})}
+\end{equation}
