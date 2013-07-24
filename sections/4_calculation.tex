@@ -65,3 +65,5 @@ trust_{distance} = \frac{1}{geodistance(loc_{report}, loc_{reportedplace})}
 \end{equation}
 %
 The function for the calculus of the geographical distance has as input the geographic coordinates of the report, retrieved from the smartphone GPS sensor, and the geographic coordinates of reported place, obtained with geolocation services like Nominatim\footnote{\url{http://wiki.openstreetmap.org/wiki/Nominatim}}.
+
+After applying our model we will get a trust value between 0 and 1, that could be inserted in the provenance graph with a \textit{up:contentConfidence=`0.6'} triple \cite{de_nies_modeling_2013}.
