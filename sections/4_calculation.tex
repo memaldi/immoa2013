@@ -1,4 +1,4 @@
-\section{Provenance data based reliability}
+\section{Provenance based reliability}
 \label{sec:provenance}
 
 There exist some approaches on how to calculate trust in semantic web using provenance information. IWTrust \cite{zaihrayeu2005iwtrust} uses provenance in the trust component of an answering engine, in which a trust value for answers is measured based on the trust in sources and in users. In \cite{golbeck2006combining} provenance data is used to evaluate the reliability of users based on trust relationships within a social network. \cite{Hartig09usingweb} presents an assesment method for evaluating the quality of data on the Web using provenance graphs, and provides a way to calculate trust values based on timeliness. In \cite{CeolinGHNF12} the authors propose generic procedures for computing reputation and trust assessments based on provenance information. 
@@ -15,31 +15,53 @@ Both the $\alpha$ values and the \textit{trust\textsubscript{p}} functions can b
 
 To clarify, we are using this model in the 311 Bilbao use case. To that end, we have selected the most relevant trust-properties concerning our use case:
 
-\textbf{Authority:} Role stuff.
+\textbf{Authority:} It refers to the fact that if a resource is created by an authority in a given context, this information is more reliable. For our use case a basic function like the following can be used:
+%
 \begin{equation}
-score_{authority} = \left\{\begin{matrix}
-0 & if user \neq admin \\
-1 & if user = admin
-\end{matrix}\right.
+	trust_{authority} = \left\{\begin{matrix}
+	0 & if user \neq authority \\
+	1 & if user = authority
+	\end{matrix}\right.
 \end{equation}
+%
+in which being authority can be checked with a SPARQL ASK query:
+%
+\lstset{numbers=left, basicstyle=\ttfamily\scriptsize,}
+\begin{lstlisting}
+PREFIX prov: <http://www.w3.org/ns/prov#>
+ASK { :jane prov:actedOnBehalfOf :bilbao_city_concil }
+\end{lstlisting}
+%
 
-\textbf{Popularity:} Visits and stuff proposed by Diego.
+\textbf{Popularity:} The number of references and uses of a piece of information is a key aspect to determine its trust. In the case of 311 Bilbao we measure the popularity of a report based on the number of visits that the report receives, with the following formula:
+%
+\begin{equation}
+    trust_{popularity} = \frac{visits_{report}}{visits_{open\ reports}}
+\end{equation}
+%
+in which the number of visits of the report is normalized with the number of overall visits of opened reports at the moment.
 
-\textbf{Agreement:} Reports saying the same thing.
+\textbf{Recommendation:} Recommendation refers to importance that the ratings that other users gives to a given resource has in its trust. The function to measure the relevance of user ratings can be as sophisticated as the developer wants, but for our case we have selected a very naive and simple one, in which other users can vote the reports with +1 / -1 buttons and the trust value is calculed with this formula:
+%
+\begin{equation}
+    trust_{recommendation} = \frac{positive\ votes_{report}}{total\ votes_{report}}
+\end{equation}
+%
 
-\textbf{Recommendation:} Sacha's +1 / -1.
-
-\textbf{Provenance:} Reputation of the user.
+\textbf{Provenance / Reputation:} In this case, \textit{provenance} refers to the trust that the entities responsible for generating a piece of information may transfer information itself. A key aspect to measure the trust in a publisher is the reputation. There exist many approaches to measure the reputation of a user; some of them measure the reputation based on trust relationships between users \cite{golbeck2006combining}, while some others like \cite{CeolinGHNF12} are based the historical evidence of each user. For the our use case, we propose using the three-step procedure presented in \cite{CeolinGHNF12}. In the `evidence selection' step every report made by a given user are retrieved, in the `evidence weighting' step the \textit{recommendation} trust function is executed for every report, and in the last step all these trust values are aggregated through subjective logic to get the trustworthiness of a given user.
 
 \textbf{Recency / Timeliness:} Timeliness can be defined as the the up-to-date degree of a data item in relation with the task at hand. We propose and adaption of \cite{Hartig09usingweb} formula to measure timeliness, based on the work described in \cite{Ballou:1998:MIM:291329.291335}:
 %
 \begin{equation}
-    timeliness = (max(1-\frac{currency}{volatility}), 0)^{sensitivity}
+    trust_{authority} = (max(1-\frac{currency}{volatility}), 0)^{sensitivity}
 \end{equation}
 %
 where \emph{currency} is the difference between the time data is presented to the user and the time it was reported to the system. \emph{Volatility} refers to the maximum amount of time a given report time should be active (for example, if a broken street lamp is reported, it should be repaired within a month at most), and \emph{sensitivity} may change its value by observing the updates made over the status of the report: it would adopt a high value for data being constantly updated, and a low value for data that does not change often.
 
-\textbf{Context:} Geographical distance.
+\textbf{Other trust factors:} Apart from the aspects identified in \cite{gil2007towards}, the model is flexible enough to include other factors affecting the trust. In the case of 311 Bilbao mobile app, the geographical distance could be a key aspect of the truth, as reports talking about events happening near to where the user sends the report would be more reliable.
+%
 \begin{equation}
-score_{distance} = \frac{1}{geodistance(loc_{report}, loc_{reportedplace})}
+trust_{distance} = \frac{1}{geodistance(loc_{report}, loc_{reportedplace})}
 \end{equation}
+%
+The function for the calculus of the geographical distance has as input the geographic coordinates of the report, retrieved from the smartphone GPS sensor, and the geographic coordinates of reported place, obtained with geolocation services like Nominatim\footnote{\url{http://wiki.openstreetmap.org/wiki/Nominatim}}.
